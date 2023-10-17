@@ -103,28 +103,6 @@ clearButton.addEventListener("click", () => {
   }
 });
 
-const undoButton = document.createElement("button");
-undoButton.innerHTML = "Undo";
-buttonContainer.append(undoButton);
-
-undoButton.addEventListener("click", () => {
-  if (lines.length > firstIteration) {
-    redoLines.push(lines.pop()!);
-    canvas.dispatchEvent(drawingChanged);
-  }
-});
-
-const redoButton = document.createElement("button");
-redoButton.innerHTML = "Redo";
-buttonContainer.append(redoButton);
-
-redoButton.addEventListener("click", () => {
-  if (redoLines.length > firstIteration) {
-    lines.push(redoLines.pop()!);
-    canvas.dispatchEvent(drawingChanged);
-  }
-});
-
 canvas.addEventListener("drawing-changed", () => {
   redraw();
 });
