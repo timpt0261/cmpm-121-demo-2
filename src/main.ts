@@ -66,6 +66,82 @@ tick();
 
 let currentLineCommand: LineCommand | null = null;
 
+// make new comand line
+// set thickness
+// draw
+
+const THIN_PEN_WIDTH = 4;
+const THICK_PEN_WIDTH = 10;
+let currentLineWidth = THIN_PEN_WIDTH;
+
+// Create a sidebar for tools
+const sidebar = document.createElement("nav");
+sidebar.style.width = "100px"; // Adjust the width as needed
+sidebar.style.height = "400px"; // Adjust the height as needed
+sidebar.style.background = "lightgray";
+sidebar.style.padding = "10px";
+sidebar.style.position = "absolute"; // Set the position to absolute
+sidebar.style.top = "0"; // Initial top position
+sidebar.style.left = "0"; // Initial left position
+sidebar.style.cursor = "grab"; // Set the cursor style to "grab" for indicating it's draggable
+sidebar.style.borderRadius = "10px"; // Add rounded corners
+
+// Variables to store the drag information
+let isDragging = false;
+let dragStartX: number;
+let dragStartY: number;
+
+// Event listener to handle the drag start
+sidebar.addEventListener("mousedown", (e: MouseEvent) => {
+  isDragging = true;
+  dragStartX = e.clientX - sidebar.getBoundingClientRect().left;
+  dragStartY = e.clientY - sidebar.getBoundingClientRect().top;
+  sidebar.style.cursor = "grabbing"; // Change cursor style during dragging
+});
+
+// Event listener to handle the drag end
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+  sidebar.style.cursor = "grab";
+});
+
+// Event listener to handle the drag movement
+document.addEventListener("mousemove", (e: MouseEvent) => {
+  if (isDragging) {
+    const newLeft = e.clientX - dragStartX;
+    const newTop = e.clientY - dragStartY;
+    sidebar.style.left = `${newLeft}px`;
+    sidebar.style.top = `${newTop}px`;
+  }
+});
+
+// Append the sidebar to the document
+document.body.appendChild(sidebar);
+
+// Create buttons
+const thin = document.createElement("button");
+thin.innerHTML = "thin";
+const thick = document.createElement("button");
+thick.innerHTML = "thick";
+
+// Append buttons to the sidebar
+sidebar.appendChild(thin);
+sidebar.appendChild(thick);
+
+// Apply margin to the buttons
+thin.style.marginBottom = "5px";
+thick.style.marginTop = "5px";
+
+thin.addEventListener("click", () => {
+  currentLineWidth = THIN_PEN_WIDTH;
+  notify("drawing-changed");
+});
+
+thick.addEventListener("click", () => {
+  currentLineWidth = THICK_PEN_WIDTH;
+  notify("drawing-changed");
+});
+
 canvas.addEventListener("mouseout", () => {
   cursorCommand = null;
   notify("cursor-changed");
@@ -89,7 +165,13 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mousedown", (e) => {
-  currentLineCommand = new LineCommand(ctx, e.offsetX, e.offsetY);
+  currentLineCommand = new LineCommand(
+    ctx,
+    e.offsetX,
+    e.offsetY,
+    currentLineWidth,
+  );
+  console.log(`${currentLineWidth}`);
   commands.push(currentLineCommand);
   redoCommands.splice(FIRST_ITERATION, redoCommands.length);
   notify("drawing-changed");
