@@ -2,8 +2,6 @@ import { CursorCommand } from "./CursorCommand";
 import { LineCommand } from "./LineCommand";
 import "./style.css";
 
-("use strict");
-
 const CANVAS_WIDTH = 256;
 const CANVAS_HEIGHT = 256;
 const FIRST_ITERATION = 0;
@@ -34,12 +32,11 @@ canvas.style.border = "3px solid black";
 canvas.style.cursor = "none";
 canvasContainer.append(canvas);
 
-const ctx = canvas.getContext("2d");
-
+const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
 const commands: LineCommand[] = [];
 const redoCommands: LineCommand[] = [];
 
-let cursorCommand: CursorCommand|null = null;
+let cursorCommand: CursorCommand | null = null;
 
 const bus = new EventTarget();
 
@@ -48,19 +45,12 @@ function notify(name: string) {
 }
 
 function redraw() {
-  if (ctx) {
-    ctx.clearRect(
-      FIRST_ITERATION,
-      FIRST_ITERATION,
-      canvas.width,
-      canvas.height
-    );
+  ctx.clearRect(FIRST_ITERATION, FIRST_ITERATION, canvas.width, canvas.height);
 
-    commands.forEach((cmd) => cmd.display());
+  commands.forEach((cmd) => cmd.display());
 
-    if (cursorCommand) {
-      cursorCommand.execute();
-    }
+  if (cursorCommand) {
+    cursorCommand.execute();
   }
 }
 
@@ -82,15 +72,15 @@ canvas.addEventListener("mouseout", () => {
 });
 
 canvas.addEventListener("mouseenter", (e: MouseEvent) => {
-  cursorCommand = new CursorCommand(ctx!, e.offsetX, e.offsetY);
+  cursorCommand = new CursorCommand(ctx, e.offsetX, e.offsetY);
   notify("cursor-changed");
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  cursorCommand = new CursorCommand(ctx!, e.offsetX, e.offsetY);
+  cursorCommand = new CursorCommand(ctx, e.offsetX, e.offsetY);
   notify("cursor-changed");
 
-  if (e.buttons == SINGLE) {
+  if (e.buttons === SINGLE) {
     if (currentLineCommand) {
       currentLineCommand.grow(e.offsetX, e.offsetY);
       notify("drawing-changed");
@@ -99,7 +89,7 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mousedown", (e) => {
-  currentLineCommand = new LineCommand(ctx!, e.offsetX, e.offsetY);
+  currentLineCommand = new LineCommand(ctx, e.offsetX, e.offsetY);
   commands.push(currentLineCommand);
   redoCommands.splice(FIRST_ITERATION, redoCommands.length);
   notify("drawing-changed");
@@ -131,7 +121,7 @@ undoButton.innerHTML = "Undo";
 buttonContainer.append(undoButton);
 
 undoButton.addEventListener("click", () => {
-  if (commands.length > FIRST_ITERATION) {
+  if (commands.length) {
     redoCommands.push(commands.pop()!);
     notify("drawing-changed");
   }
@@ -142,7 +132,7 @@ redoButton.innerHTML = "Redo";
 buttonContainer.append(redoButton);
 
 redoButton.addEventListener("click", () => {
-  if (redoCommands.length > FIRST_ITERATION) {
+  if (redoCommands.length) {
     commands.push(redoCommands.pop()!);
     notify("drawing-changed");
   }
