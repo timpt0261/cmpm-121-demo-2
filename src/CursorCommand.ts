@@ -1,24 +1,26 @@
-const CURSOR_OFFSET_X = -8;
-const CURSOR_OFFSET_Y = 16;
-const CURSOR_FONT_SIZE = "32px monospace";
-
 export class CursorCommand {
   private x: number;
   private y: number;
-  private readonly xOffset = CURSOR_OFFSET_X;
-  private readonly yOffset = CURSOR_OFFSET_Y;
   private ctx: CanvasRenderingContext2D;
+  private fontSize: string;
 
-  constructor(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    fontSize: string,
+  ) {
     this.x = x;
     this.y = y;
     this.ctx = ctx;
+    this.fontSize = fontSize;
   }
 
-  execute(): void {
+  draw(): void {
+    const offest = -8;
     if (this.ctx) {
-      this.ctx.font = CURSOR_FONT_SIZE;
-      this.ctx.fillText("*", this.x + this.xOffset, this.y + this.yOffset);
+      this.ctx.font = this.fontSize;
+      this.ctx.fillText(".", this.x + offest, this.y);
     }
   }
 }

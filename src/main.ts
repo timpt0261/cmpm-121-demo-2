@@ -7,6 +7,14 @@ const CANVAS_HEIGHT = 256;
 const FIRST_ITERATION = 0;
 const SINGLE = 1;
 
+const THIN_PEN_WIDTH = 4;
+const THICK_PEN_WIDTH = 10;
+let currentLineWidth = THIN_PEN_WIDTH;
+
+const THIN_CURSOR_FONT_SIZE = "32px monospace";
+const THICK_CURSOR_FONT_SIZE = "64px monospace";
+let CURRENT_CURSOR_FONT_SIZE = THIN_CURSOR_FONT_SIZE;
+
 const app: HTMLDivElement = document.querySelector("#app")!;
 
 const gameName = "Dibujo";
@@ -50,12 +58,20 @@ function redraw() {
   commands.forEach((cmd) => cmd.display());
 
   if (cursorCommand) {
-    cursorCommand.execute();
+    cursorCommand.draw();
   }
+}
+
+function changeCursor() {
+  CURRENT_CURSOR_FONT_SIZE =
+    CURRENT_CURSOR_FONT_SIZE === THIN_CURSOR_FONT_SIZE
+      ? THICK_CURSOR_FONT_SIZE
+      : THIN_CURSOR_FONT_SIZE;
 }
 
 bus.addEventListener("drawing-changed", redraw);
 bus.addEventListener("cursor-changed", redraw);
+bus.addEventListener("tool-moved", changeCursor);
 
 function tick() {
   redraw();
@@ -65,14 +81,6 @@ function tick() {
 tick();
 
 let currentLineCommand: LineCommand | null = null;
-
-// make new comand line
-// set thickness
-// draw
-
-const THIN_PEN_WIDTH = 4;
-const THICK_PEN_WIDTH = 10;
-let currentLineWidth = THIN_PEN_WIDTH;
 
 // Create a sidebar for tools
 const sidebar = document.createElement("nav");
@@ -135,11 +143,13 @@ thick.style.marginTop = "5px";
 thin.addEventListener("click", () => {
   currentLineWidth = THIN_PEN_WIDTH;
   notify("drawing-changed");
+  notify("tool-moved");
 });
 
 thick.addEventListener("click", () => {
   currentLineWidth = THICK_PEN_WIDTH;
   notify("drawing-changed");
+  notify("tool-moved");
 });
 
 canvas.addEventListener("mouseout", () => {
@@ -148,12 +158,22 @@ canvas.addEventListener("mouseout", () => {
 });
 
 canvas.addEventListener("mouseenter", (e: MouseEvent) => {
-  cursorCommand = new CursorCommand(ctx, e.offsetX, e.offsetY);
+  cursorCommand = new CursorCommand(
+    ctx,
+    e.offsetX,
+    e.offsetY,
+    CURRENT_CURSOR_FONT_SIZE,
+  );
   notify("cursor-changed");
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  cursorCommand = new CursorCommand(ctx, e.offsetX, e.offsetY);
+  cursorCommand = new CursorCommand(
+    ctx,
+    e.offsetX,
+    e.offsetY,
+    CURRENT_CURSOR_FONT_SIZE,
+  );
   notify("cursor-changed");
 
   if (e.buttons === SINGLE) {
