@@ -14,6 +14,9 @@ let currentLineWidth = THIN_PEN_WIDTH;
 const THIN_CURSOR_FONT_SIZE = "32px monospace";
 const THICK_CURSOR_FONT_SIZE = "64px monospace";
 let CURRENT_CURSOR_FONT_SIZE = THIN_CURSOR_FONT_SIZE;
+let currentCursor = ".";
+
+let stickerMode = false;
 
 const app: HTMLDivElement = document.querySelector("#app")!;
 
@@ -62,16 +65,10 @@ function redraw() {
   }
 }
 
-function changeCursor() {
-  CURRENT_CURSOR_FONT_SIZE =
-    CURRENT_CURSOR_FONT_SIZE === THIN_CURSOR_FONT_SIZE
-      ? THICK_CURSOR_FONT_SIZE
-      : THIN_CURSOR_FONT_SIZE;
-}
-
 bus.addEventListener("drawing-changed", redraw);
-bus.addEventListener("cursor-changed", redraw);
-bus.addEventListener("tool-moved", changeCursor);
+bus.addEventListener("tool-moved", () => {
+  redraw();
+});
 
 function tick() {
   redraw();
@@ -132,29 +129,72 @@ thin.innerHTML = "thin";
 const thick = document.createElement("button");
 thick.innerHTML = "thick";
 
+const sticker1 = document.createElement("button");
+sticker1.innerHTML = "🤖";
+const sticker2 = document.createElement("button");
+sticker2.innerHTML = "💀";
+const sticker3 = document.createElement("button");
+sticker3.innerHTML = "🚀";
+
 // Append buttons to the sidebar
 sidebar.appendChild(thin);
 sidebar.appendChild(thick);
+sidebar.appendChild(sticker1);
+sidebar.appendChild(sticker2);
+sidebar.appendChild(sticker3);
 
 // Apply margin to the buttons
 thin.style.marginBottom = "5px";
 thick.style.marginTop = "5px";
+sticker1.style.marginTop = "5px";
+sticker2.style.marginTop = "5px";
+sticker3.style.marginTop = "5px";
 
 thin.addEventListener("click", () => {
+  currentCursor = ".";
+  CURRENT_CURSOR_FONT_SIZE = THIN_CURSOR_FONT_SIZE;
   currentLineWidth = THIN_PEN_WIDTH;
+  stickerMode = false;
   notify("drawing-changed");
   notify("tool-moved");
 });
 
 thick.addEventListener("click", () => {
+  currentCursor = ".";
+  CURRENT_CURSOR_FONT_SIZE = THICK_CURSOR_FONT_SIZE;
   currentLineWidth = THICK_PEN_WIDTH;
+  stickerMode = false;
+  notify("drawing-changed");
+  notify("tool-moved");
+});
+
+sticker1.addEventListener("click", () => {
+  currentCursor = sticker1.innerHTML;
+  CURRENT_CURSOR_FONT_SIZE = THIN_CURSOR_FONT_SIZE;
+  stickerMode = true;
+  notify("drawing-changed");
+  notify("tool-moved");
+});
+
+sticker2.addEventListener("click", () => {
+  currentCursor = sticker2.innerHTML;
+  CURRENT_CURSOR_FONT_SIZE = THIN_CURSOR_FONT_SIZE;
+  stickerMode = true;
+  notify("drawing-changed");
+  notify("tool-moved");
+});
+
+sticker3.addEventListener("click", () => {
+  currentCursor = sticker3.innerHTML;
+  CURRENT_CURSOR_FONT_SIZE = THIN_CURSOR_FONT_SIZE;
+  stickerMode = true;
   notify("drawing-changed");
   notify("tool-moved");
 });
 
 canvas.addEventListener("mouseout", () => {
   cursorCommand = null;
-  notify("cursor-changed");
+  notify("tool-moved");
 });
 
 canvas.addEventListener("mouseenter", (e: MouseEvent) => {
@@ -163,8 +203,9 @@ canvas.addEventListener("mouseenter", (e: MouseEvent) => {
     e.offsetX,
     e.offsetY,
     CURRENT_CURSOR_FONT_SIZE,
+    currentCursor,
   );
-  notify("cursor-changed");
+  notify("tool-moved");
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -173,8 +214,9 @@ canvas.addEventListener("mousemove", (e) => {
     e.offsetX,
     e.offsetY,
     CURRENT_CURSOR_FONT_SIZE,
+    currentCursor,
   );
-  notify("cursor-changed");
+  notify("tool-moved");
 
   if (e.buttons === SINGLE) {
     if (currentLineCommand) {
@@ -190,6 +232,8 @@ canvas.addEventListener("mousedown", (e) => {
     e.offsetX,
     e.offsetY,
     currentLineWidth,
+    stickerMode,
+    currentCursor,
   );
   console.log(`${currentLineWidth}`);
   commands.push(currentLineCommand);
