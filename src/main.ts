@@ -38,7 +38,7 @@ function setUpCanvs() {
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
   canvas.style.background = "lightgrey";
-  canvas.style.boxShadow = "1rem 1rem 10px black";
+  canvas.style.boxShadow = "1rem 1rem 1FIRST_ITERATIONpx black";
   canvas.style.borderRadius = "45px";
   canvas.style.border = "3px solid black";
   canvas.style.cursor = "none";
@@ -158,16 +158,20 @@ function setUpButtonsToCanvas() {
   buttonContainer.style.justifyContent = "center";
   canvasContainer.append(buttonContainer);
 
+  createClearButton(buttonContainer);
+  createUndoRedoButton("Undo", buttonContainer, commands, redoCommands);
+  createUndoRedoButton("Redo", buttonContainer, redoCommands, commands);
+  createExportButton(buttonContainer);
+}
+
+function createClearButton(buttonContainer: HTMLDivElement) {
   const clearButton = document.createElement("button");
   clearButton.innerHTML = "Clear";
   buttonContainer.append(clearButton);
-
-  clearButton.addEventListener("click", clear);
-  createUndoRedoButton("Undo", buttonContainer, commands, redoCommands);
-  createUndoRedoButton("Redo", buttonContainer, redoCommands, commands);
+  clearButton.addEventListener("click", clearCommands);
 }
 
-function clear() {
+function clearCommands() {
   if (canvas && ctx) {
     commands.splice(FIRST_ITERATION, commands.length);
     notify("drawing-changed");
@@ -190,4 +194,45 @@ function createUndoRedoButton(
       notify("drawing-changed");
     }
   });
+}
+
+function createExportButton(buttonContainer: HTMLDivElement) {
+  const exportButton = document.createElement("button");
+  exportButton.innerHTML = "Export";
+  buttonContainer.append(exportButton);
+  exportButton.addEventListener("click", exportFeature);
+}
+function exportFeature() {
+  const exportedDimension = 1024;
+
+  const exportCanvas = document.createElement("canvas");
+
+  exportCanvas.width = exportedDimension;
+  exportCanvas.height = exportedDimension;
+
+  const exportContext = exportCanvas.getContext("2d");
+
+  // Copy the drawings from the original canvas to the export canvas
+  exportContext!.drawImage(
+    canvas,
+    FIRST_ITERATION,
+    FIRST_ITERATION,
+    canvas.width,
+    canvas.height,
+    FIRST_ITERATION,
+    FIRST_ITERATION,
+    exportCanvas.width,
+    exportCanvas.height,
+  );
+
+  // Scale the export canvas
+  const scale = 4;
+  exportContext!.scale(scale, scale);
+
+  // Trigger a file download with the contents of the export canvas as a PNG
+  const dataURL = exportCanvas.toDataURL("image/png");
+  const anchor = document.createElement("a");
+  anchor.href = dataURL;
+  anchor.download = "exportedImage.png";
+  anchor.click();
 }
