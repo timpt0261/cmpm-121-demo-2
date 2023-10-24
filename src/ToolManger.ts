@@ -1,14 +1,6 @@
-import {
-  FontSize,
-  ToolTypeName,
-  currentSetting,
-  largeLineWidth,
-  notify,
-  smallLineWidth,
-} from "./Setting";
-const smallCursorFontSize: FontSize = "32px monospace";
-const largeCursorFontSize: FontSize = "64px monospace";
+import { currentSetting, notify } from "./Setting";
 
+type ToolTypeName = "draw" | "sticker" | "add";
 // Related to buttons
 interface Button {
   buttonHtml: HTMLButtonElement;
@@ -26,8 +18,8 @@ export function createButton(name: string, type: ToolTypeName) {
 function setCursor(
   cursor: string,
   lineWidth: number,
-  cursorFontSize: FontSize,
-  mode: boolean,
+  cursorFontSize: string,
+  mode: boolean
 ) {
   currentSetting.currentCursor = mode ? cursor : ".";
   currentSetting.currentLineWidth = lineWidth;
@@ -37,35 +29,42 @@ function setCursor(
   notify("drawing-changed");
   notify("tool-moved");
 }
+
+const minLineWidth = 1;
+const maxLineWidth = 10;
+
 function setEventForDrawButton(button: Button) {
-  if (button.buttonHtml.innerHTML === "thin") {
-    button.buttonHtml.addEventListener("click", () => {
-      setCursor(
-        button.buttonHtml.innerHTML,
-        smallLineWidth,
-        smallCursorFontSize,
-        false,
-      );
-    });
-  } else {
-    button.buttonHtml.addEventListener("click", () => {
-      setCursor(
-        button.buttonHtml.innerHTML,
-        largeLineWidth,
-        largeCursorFontSize,
-        false,
-      );
-    });
-  }
+  button.buttonHtml.addEventListener("click", () => {
+    const name = button.buttonHtml.innerHTML;
+    const currentLineWidth = currentSetting.currentLineWidth;
+    const newLineWidth = setLineWidth(name, currentLineWidth);
+    const newCursorWidth = setCursorWidth(newLineWidth);
+    console.log(`Changed Line Width to ${newLineWidth}`);
+    console.log(`Changed Cursor Font Size ${newCursorWidth}`);
+    setCursor(button.buttonHtml.innerHTML, newLineWidth, newCursorWidth, false);
+  });
   return button;
 }
+
+function setCursorWidth(width: number): string {
+  const m = 7.11;
+  const b = 8.89;
+  return `${m * width + b}px monospace`;
+}
+
+function setLineWidth(name: string, currentLineWidth: number) {
+  return name === "thin"
+    ? Math.max(minLineWidth, currentLineWidth - minLineWidth)
+    : Math.min(maxLineWidth, currentLineWidth + minLineWidth);
+}
+
 function setEventforStickerButton(button: Button) {
   button.buttonHtml.addEventListener("click", () => {
     setCursor(
       button.buttonHtml.innerHTML,
-      smallLineWidth,
-      smallCursorFontSize,
-      true,
+      minLineWidth,
+      "32px monospace",
+      true
     );
   });
   return button;

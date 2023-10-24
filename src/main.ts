@@ -4,10 +4,11 @@ import { createPalette } from "./Palette";
 import { bus, currentSetting, notify } from "./Setting";
 import "./style.css";
 
-const CANVAS_WIDTH = 256;
-const CANVAS_HEIGHT = 256;
-const FIRST_ITERATION = 0;
-const SINGLE = 1;
+const CANVAS_WIDTH = 1028;
+const CANVAS_HEIGHT = 1028;
+
+const FIRST_INDEX = 0;
+const NEXT_INDEX = 1;
 
 const app: HTMLDivElement = document.querySelector("#app")!;
 
@@ -47,7 +48,7 @@ function setUpCanvs() {
 }
 
 function redraw() {
-  ctx.clearRect(FIRST_ITERATION, FIRST_ITERATION, canvas.width, canvas.height);
+  ctx.clearRect(FIRST_INDEX, FIRST_INDEX, canvas.width, canvas.height);
 
   commands.forEach((cmd) => cmd.display());
 
@@ -113,7 +114,7 @@ function onMouseDown(e: MouseEvent) {
   );
   console.log(`${currentSetting.currentLineWidth}`);
   commands.push(currentLineCommand);
-  redoCommands.splice(FIRST_ITERATION, redoCommands.length);
+  redoCommands.splice(FIRST_INDEX, redoCommands.length);
   notify("drawing-changed");
 }
 
@@ -127,7 +128,7 @@ function onMouseMove(e: MouseEvent) {
   );
   notify("tool-moved");
 
-  if (e.buttons === SINGLE) {
+  if (e.buttons === NEXT_INDEX) {
     if (currentLineCommand) {
       currentLineCommand.grow(e.offsetX, e.offsetY);
       notify("drawing-changed");
@@ -173,7 +174,7 @@ function createClearButton(buttonContainer: HTMLDivElement) {
 
 function clearCommands() {
   if (canvas && ctx) {
-    commands.splice(FIRST_ITERATION, commands.length);
+    commands.splice(FIRST_INDEX, commands.length);
     notify("drawing-changed");
   }
 }
@@ -215,12 +216,12 @@ function exportFeature() {
   // Copy the drawings from the original canvas to the export canvas
   exportContext!.drawImage(
     canvas,
-    FIRST_ITERATION,
-    FIRST_ITERATION,
+    FIRST_INDEX,
+    FIRST_INDEX,
     canvas.width,
     canvas.height,
-    FIRST_ITERATION,
-    FIRST_ITERATION,
+    FIRST_INDEX,
+    FIRST_INDEX,
     exportCanvas.width,
     exportCanvas.height,
   );

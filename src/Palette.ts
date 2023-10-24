@@ -61,6 +61,7 @@ function setUpPalette() {
   sidebar.style.left = "0"; // Initial left position
   sidebar.style.cursor = "grab"; // Set the cursor style to "grab" for indicating it's draggable
   sidebar.style.borderRadius = "10px"; // Add rounded corners
+  sidebar.style.border = "2px solid black";
   return sidebar;
 }
 function handleDrag(

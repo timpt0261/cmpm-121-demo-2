@@ -1,14 +1,12 @@
 export type EventName = "drawing-changed" | "tool-moved";
-export type ToolTypeName = "draw" | "sticker" | "add";
 
-export const smallLineWidth = 4;
+
+export const smallLineWidth = 1;
 export const largeLineWidth = 10;
-
-export type FontSize = "32px monospace" | "64px monospace";
 
 interface Setting {
   currentLineWidth: number;
-  currentCursorFontSize: FontSize;
+  currentCursorFontSize: string;
   currentCursor: string;
   stickerMode: boolean;
 }
