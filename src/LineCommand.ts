@@ -31,6 +31,7 @@ export class LineCommand {
   display(): void {
     if (this.stickerMode) {
       // place sticker in canvas
+      this.ctx.font = "32px monospace";
       const { x, y } = this.points[FIRST_ITERATION];
       this.ctx.fillText(this.sticker, x, y);
     } else {
