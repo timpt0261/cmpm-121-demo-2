@@ -4,8 +4,8 @@ import { createPalette } from "./Palette";
 import { bus, currentSetting, notify } from "./Setting";
 import "./style.css";
 
-const CANVAS_WIDTH = 1028;
-const CANVAS_HEIGHT = 1028;
+const CANVAS_WIDTH = 500;
+const CANVAS_HEIGHT = 500;
 
 const FIRST_INDEX = 0;
 const NEXT_INDEX = 1;
@@ -109,10 +109,10 @@ function onMouseDown(e: MouseEvent) {
     e.offsetX,
     e.offsetY,
     currentSetting.currentLineWidth,
+    currentSetting.currentColor,
     currentSetting.stickerMode,
-    currentSetting.currentCursor,
+    currentSetting.currentCursor
   );
-  console.log(`${currentSetting.currentLineWidth}`);
   commands.push(currentLineCommand);
   redoCommands.splice(FIRST_INDEX, redoCommands.length);
   notify("drawing-changed");
@@ -124,7 +124,8 @@ function onMouseMove(e: MouseEvent) {
     e.offsetX,
     e.offsetY,
     currentSetting.currentCursorFontSize,
-    currentSetting.currentCursor,
+    currentSetting.currentColor,
+    currentSetting.currentCursor
   );
   notify("tool-moved");
 
@@ -142,7 +143,8 @@ function onMouseEnter(e: MouseEvent) {
     e.offsetX,
     e.offsetY,
     currentSetting.currentCursorFontSize,
-    currentSetting.currentCursor,
+    currentSetting.currentColor,
+    currentSetting.currentCursor
   );
   notify("tool-moved");
 }
@@ -183,7 +185,7 @@ function createUndoRedoButton(
   name: string,
   buttonContainer: HTMLDivElement,
   commands: LineCommand[],
-  redoCommands: LineCommand[],
+  redoCommands: LineCommand[]
 ) {
   const undoButton = document.createElement("button");
   undoButton.innerHTML = name;
@@ -223,7 +225,7 @@ function exportFeature() {
     FIRST_INDEX,
     FIRST_INDEX,
     exportCanvas.width,
-    exportCanvas.height,
+    exportCanvas.height
   );
 
   // Scale the export canvas

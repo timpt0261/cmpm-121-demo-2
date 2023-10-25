@@ -1,8 +1,14 @@
-import { createButton, setEventforButtons } from "./ToolManger";
+import { bus } from "./Setting";
+import {
+  createButton,
+  positionButtonsInCircle,
+  setButtonRoundess,
+  setEventforButtons,
+} from "./ToolManger";
 
 // Related to Palette
 export function createPalette() {
-  const sidebar = setUpPalette(); // Add rounded corners
+  const sidebar = setUpPalette();
 
   // Variables to store the drag information
   let isDragging = false;
@@ -16,8 +22,8 @@ export function createPalette() {
       dragStartX,
       e,
       sidebar,
-      dragStartY,
-    )); // Change cursor style during dragging
+      dragStartY
+    ));
   });
 
   // Event listener to handle the drag end
@@ -33,43 +39,79 @@ export function createPalette() {
   // Append the sidebar to the document
   document.body.appendChild(sidebar);
 
-  // Create buttons
-  const sidebarButtons = [
+  // Create buttons for the outer circle
+  createButtonsForSideBar(sidebar);
+}
+
+function createButtonsForSideBar(sidebar: HTMLElement) {
+  // Create buttons for the outer circle
+  const outerCircleButtons = [
     createButton("thin", "draw"),
     createButton("thick", "draw"),
     createButton("🤖", "sticker"),
     createButton("💀", "sticker"),
     createButton("🚀", "sticker"),
-    createButton("+", "add"),
+    createButton("Choose Color", "choose-color"),
+    createButton("Random Color", "random-color"),
   ];
 
-  sidebarButtons.forEach((button) => {
-    // fix to make button function on click
-    sidebar.append(button.buttonHtml);
+  // Create buttons for the center circle
+  const centerCircleButtons = [createButton("+", "add")];
+
+  // Create a div element for the center circle
+  const centerCircle = document.createElement("div");
+  centerCircle.className = "center-circle";
+
+  const innerCircleRadius = 120;
+  const centerCircleRadius = 30;
+  // Append buttons to the outer circle and position them in a circular formation
+  positionButtonsInCircle(outerCircleButtons, innerCircleRadius);
+
+  outerCircleButtons.forEach((button) => {
+    if (button.type === "choose-color" || button.type === "random-color")
+      button.buttonHtml.style.fontSize = "12px";
+    button = setEventforButtons(button, sidebar, outerCircleButtons);
+    button = setButtonRoundess(button);
+    sidebar.appendChild(button.buttonHtml);
+  });
+
+  bus.addEventListener("change-palette", () => { 
+    positionButtonsInCircle(outerCircleButtons, innerCircleRadius);
+  });
+  // Append the center circle to the sidebar
+  sidebar.appendChild(centerCircle);
+
+  // Append buttons to the center circle and position them in a circular formation
+  positionButtonsInCircle(centerCircleButtons, centerCircleRadius);
+
+  centerCircleButtons.forEach((button) => {
     button = setEventforButtons(button, sidebar);
+    button.buttonHtml.style.font = "12px monospace";
+    centerCircle.appendChild(button.buttonHtml);
   });
 }
 
 function setUpPalette() {
   const sidebar = document.createElement("nav");
-  sidebar.style.width = "100px"; // Adjust the width as needed
-  sidebar.style.height = "400px"; // Adjust the height as needed
+  sidebar.style.width = "320px"; // Adjust the width as needed
+  sidebar.style.height = "320px"; // Adjust the height as needed
   sidebar.style.background = "lightgray";
   sidebar.style.padding = "10px";
   sidebar.style.position = "absolute"; // Set the position to absolute
   sidebar.style.top = "0"; // Initial top position
   sidebar.style.left = "0"; // Initial left position
   sidebar.style.cursor = "grab"; // Set the cursor style to "grab" for indicating it's draggable
-  sidebar.style.borderRadius = "10px"; // Add rounded corners
+  sidebar.style.borderRadius = "200px 200px  200px 200px"; // Create an oval shape
   sidebar.style.border = "2px solid black";
   return sidebar;
 }
+
 function handleDrag(
   isDragging: boolean,
   e: MouseEvent,
   dragStartX: number,
   dragStartY: number,
-  sidebar: HTMLElement,
+  sidebar: HTMLElement
 ) {
   if (isDragging) {
     const newLeft = e.clientX - dragStartX;
@@ -88,7 +130,7 @@ function dragStart(
   dragStartX: number,
   e: MouseEvent,
   sidebar: HTMLElement,
-  dragStartY: number,
+  dragStartY: number
 ) {
   isDragging = true;
   dragStartX = e.clientX - sidebar.getBoundingClientRect().left;
@@ -96,3 +138,4 @@ function dragStart(
   sidebar.style.cursor = "grabbing";
   return { isDragging, dragStartX, dragStartY };
 }
+
